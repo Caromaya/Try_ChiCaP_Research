@@ -1,30 +1,42 @@
 import sys
-data={}
 
-first=True
-for line in open(sys.argv[2]):
-	content=line.strip().split(";")
-	if first:
-		first=False
-		header=";".join(content[1:])
-		continue
+data = {}
+first = True
 
-	data[content[0]]=content[1:]
-
-first=True
+# Process the first file
 for line in open(sys.argv[1]):
-	if first:
-		print(line.strip()+";"+header)
-		first=False
-		continue
-	content=line.strip().split(";")
-  # Not sure if this works Jesper, but I tried!
-  genes_to_search = content[4].split("|")
+    content = line.strip().split(",")
+    if first:
+        header = content[2:]
+        first = False
+        continue
+    #print(content[1].split(" ")[0])
+    #print(line.strip())
+    data[content[1].split(" ")[0]] = content[2:]
 
-  try:
-    # Search each gene individually in the ChiCaP file
-    # Hoping both genes are not in the gene list...
-    values_to_print = [";".join(data[gene]) for gene in genes_to_search]
-    print(line.strip() + ";" + ";".join(values_to_print))
-  except:
-    print(line.strip() + ";" + ";".join(["NA"] * 5))
+first = True
+n_cols = len(header)
+
+#print(data)
+#quit()
+
+#if "GMSB-ST066" in data:
+#    print("carro!")
+
+# Process the second file
+for line in open(sys.argv[2]):
+    content = line.strip().split(",")
+    if first:
+        print(line.strip() + "," + ",".join(header))
+        first = False
+        continue
+
+    #print(content[0])
+    #print(data[content[0]])
+
+    content[0] = "-".join(content[0].replace("MIP", "").replace("-Research", "").rstrip("-").split("-")[0:2])
+    
+    try:
+        print(line.strip() + "," + ",".join(data[content[0]]))
+    except KeyError:
+        print(line.strip() + "," + ",".join(["NA"] * n_cols))
